@@ -18,6 +18,10 @@
     "JENKINS_TOKEN": {
       "description": "API token of your user in Jenkins",
       "required": true
+    },
+    "JENKINS_USERNAME": {
+      "description": "API username in Jenkins",
+      "required": true
     }
   }
 }
