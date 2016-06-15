@@ -61,5 +61,6 @@ post '/' do
            }}
   @client.job.build(job_name, job_params, opts)
 
+  job_name
 
 end
