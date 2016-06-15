@@ -56,10 +56,10 @@ post '/' do
               # slack_webhook_url = ENV['SLACK_WEBHOOK_URL']
               if slack_webhook_url
                 notifier = Slack::Notifier.new slack_webhook_url
-                notifier.ping "Started job '#{job_name}' - #{jenkins_job_url}/#{build_number}"
+                notifier.ping "Started job '#{job_name}' - http://build.qptlops.net/job/#{job_name}/#{build_number}"
               end
            }}
-  @client.job.build(job_name, job_params, opts)
+  @jenkins_client.job.build(job_name, job_params, opts)
 
   job_name
 
