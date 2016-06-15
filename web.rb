@@ -37,13 +37,16 @@ post '/' do
 
   # Jenkins url
   jenkins_job_url = "#{jenkins_url}/job/#{job}"
+  puts "jenkins_url #{jenkins_url}"
 
-  client = JenkinsApi::Client.new(:server_ip => jenkins_url,
+  @client = JenkinsApi::Client.new(:server_ip => jenkins_url,
          :username => jenkins_username, :password => jenkins_token)
+  puts "client #{client}"
 
   
   # # The following call will return all jobs matching 'Testjob'
-  android_jobs = client.job.list("^slack")
+  android_jobs = @client.job.list("^slack")
+  puts "android_jobs #{android_jobs}"
 
   notifier = Slack::Notifier.new slack_webhook_url
   notifier.ping "Started job '#{android_jobs}'" 
