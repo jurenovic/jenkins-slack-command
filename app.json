@@ -1,7 +1,7 @@
 {
   "name": "Jenkins Slack Command Sample",
   "description": "An instance for Jenkins Slack Command for starting builds",
-  "repository": "https://github.com/joshdholtz/jenkins-slack-command",
+  "repository": "https://github.com/jurenovic/jenkins-slack-command",
   "keywords": ["jenkins", "slack", "command", "awesome"],
   "env": {
     "SLACK_TOKEN": {
