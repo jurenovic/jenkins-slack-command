@@ -57,8 +57,8 @@ post '/' do
   # json = JSON.generate( {:parameter => parameters} )
   # resp = RestClient.post "#{jenkins_job_url}/build?token=#{jenkins_token}", :json => json
 
-  # # Build url
-  # build_url = "#{jenkins_job_url}/#{next_build_number}"
+  # Build url
+  build_url = "#{jenkins_job_url}/"
 
   # slack_webhook_url = ENV['SLACK_WEBHOOK_URL']
   # if slack_webhook_url
