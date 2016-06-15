@@ -19,56 +19,47 @@ post '/' do
   # Verify slack token matches environment variable
   return [401, "No authorized for this command"] unless slack_token == params['token']
 
+  @jenkins_client = JenkinsApi::Client.new(
+      # :server_ip => jenkins_ip,
+      :server_url => jenkins_url,
+      :username => jenkins_username,
+      :password => jenkins_token,
+      :log_level => Logger::DEBUG,
+      :follow_redirects => true,
+      )
+
   # Split command text
   text_parts = params['text'].split(' ')
 
-  # Split command text - job
-  job = text_parts[0]
+  # Split command text - job_name
+  job_name = text_parts[0]
 
-  # Split command text - parameters
-  parameters = []
+  # Split command text - job_params
+  job_params = {}
   if text_parts.size > 1
     all_params = text_parts[1..-1]
     all_params.each do |p|
       p_thing = p.split('=')
-      parameters << { :name => p_thing[0], :value => p_thing[1] }
+      job_params << { :name => p_thing[0], :value => p_thing[1] }
     end
   end
 
   # Jenkins url
-  jenkins_job_url = "#{jenkins_url}/job/#{job}"
-  puts "jenkins_url #{jenkins_url}"
+  jenkins_job_url = "#{jenkins_url}/job/#{job_name}"
 
-  @client = JenkinsApi::Client.new(:server_ip => jenkins_url,
-         :username => jenkins_username, :password => jenkins_token)
-  puts "client #{client}"
+  # Wait for up to 30 seconds, attempt to cancel queued build, progress
+  opts = {'build_start_timeout' => 30,
+          'cancel_on_build_start_timeout' => true,
+          'poll_interval' => 2,      # 2 is actually the default :)
+          'progress_proc' => lambda {|max,curr,count| puts "max #{max}, curr #{curr}, count #{count}" },
+          'completion_proc' => lambda {|build_number,cancelled| 
+              # slack_webhook_url = ENV['SLACK_WEBHOOK_URL']
+              if slack_webhook_url
+                notifier = Slack::Notifier.new slack_webhook_url
+                notifier.ping "Started job '#{job_name}' - #{jenkins_job_url}/#{build_number}"
+              end
+           }}
+  @client.job.build(job_name, job_params, opts)
 
-  
-  # # The following call will return all jobs matching 'Testjob'
-  android_jobs = @client.job.list("^slack")
-  puts "android_jobs #{android_jobs}"
-
-  notifier = Slack::Notifier.new slack_webhook_url
-  notifier.ping "Started job '#{android_jobs}'" 
-
-  # # Get next jenkins job build number
-  # resp = RestClient.get "#{jenkins_job_url}/api/json"
-  # resp_json = JSON.parse( resp.body )
-  # next_build_number = resp_json['nextBuildNumber']
-
-  # # Make jenkins request
-  # json = JSON.generate( {:parameter => parameters} )
-  # resp = RestClient.post "#{jenkins_job_url}/build?token=#{jenkins_token}", :json => json
-
-  # Build url
-  build_url = "#{jenkins_job_url}/"
-
-  # slack_webhook_url = ENV['SLACK_WEBHOOK_URL']
-  # if slack_webhook_url
-  #   notifier = Slack::Notifier.new slack_webhook_url
-  #   notifier.ping "Started job '#{job}' - #{build_url}"
-  # end
-
-  build_url
 
 end
